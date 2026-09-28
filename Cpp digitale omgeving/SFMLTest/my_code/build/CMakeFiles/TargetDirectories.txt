@@ -1,0 +1,3 @@
+C:/Users/danie/OneDrive/Documents/VS code/Cpp digitale omgeving/SFMLTest/my_code/build/CMakeFiles/SFMLTest.dir
+C:/Users/danie/OneDrive/Documents/VS code/Cpp digitale omgeving/SFMLTest/my_code/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/danie/OneDrive/Documents/VS code/Cpp digitale omgeving/SFMLTest/my_code/build/CMakeFiles/ZERO_CHECK.dir
