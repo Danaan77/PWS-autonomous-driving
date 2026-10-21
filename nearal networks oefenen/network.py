@@ -10,15 +10,15 @@ device = torch.accelerator.current_accelerator().type if torch.accelerator.is_av
 print(f"Using {device} device")
 
 class NeuralNetwork(nn.Module):
-    def __init__(self):
+    def __init__(self, in_features=2, h1=64, h2=32, output_features=1):
         super().__init__()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28, 512),
+            nn.Linear(in_features, h1),
             nn.ReLU(),
-            nn.Linear(512, 512),
+            nn.Linear(h1, h2),
             nn.ReLU(),
-            nn.Linear(512, 10),
+            nn.Linear(h2, output_features),
         )
     def forward(self, x):
         x = self.flatten(x)
@@ -28,7 +28,7 @@ class NeuralNetwork(nn.Module):
 model = NeuralNetwork().to(device)
 print(model)
 
-X = torch.rand(1, 28, 28, device=device)
+X = torch.rand(1, 2, device=device)
 logits = model(X)
 pred_probab = nn.Softmax(dim=1)(logits)
 y_pred = pred_probab.argmax(1)
