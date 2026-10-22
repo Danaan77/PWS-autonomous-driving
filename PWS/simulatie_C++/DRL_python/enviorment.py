@@ -17,7 +17,7 @@ x = 250
 v = 0
 dt = 0.1
 
-class JeftAI():
+class JeftAI:
     def __init__(self, y=400, x=screen.get_width()/2, v=0):
         self.y = y
         self.x = x
@@ -68,7 +68,14 @@ class JeftAI():
 
         return self.reward, self.terminated
 
-agent = JeftAI()
+#    def __init__(self, y=400, x=screen.get_width()/2, v=0):
+
+agents = [
+JeftAI(y=450, x=screen.get_width()/2, v=0),
+JeftAI(y=350, x=screen.get_width()/2-50, v=5),
+JeftAI(y=250, x=screen.get_width()/2-20, v=2),
+JeftAI(y=150, x=screen.get_width()/2+30, v=-3)
+]
 
 while running:
     screen.fill((200,150,200))
@@ -76,9 +83,12 @@ while running:
     Wall = pygame.Rect(0, 0, 30, screen.get_height())
     Wall2 = pygame.Rect(screen.get_width() - 30, 0, 30, screen.get_height())
 
-    agent_x, agent_y = agent.move()
-    agent_hitbox, collision1, collision2 = agent.hitbox()
-    agent_reward, terminated = agent.rewarding()
+    for agent in agents:
+        agent_x, agent_y = agent.move()
+        agent_hitbox, collision1, collision2 = agent.hitbox()
+        agent_reward, terminated = agent.rewarding()
+        ReplayBuffer = [agent_x, agent_y, agent_hitbox, collision1, collision2, agent_reward, terminated]
+        print(ReplayBuffer)
 
     pygame.draw.rect(screen, (255 * collision1 , 255 * (1 - collision1) ,0), Wall)
     pygame.draw.rect(screen, (255 * collision2 , 255 * (1 - collision2) ,0), Wall2)
