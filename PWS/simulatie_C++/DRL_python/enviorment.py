@@ -87,7 +87,7 @@ while running:
         agent_x, agent_y = agent.move()
         agent_hitbox, collision1, collision2 = agent.hitbox()
         agent_reward, terminated = agent.rewarding()
-        ReplayBuffer = [agent_x, agent_y, agent_hitbox, collision1, collision2, agent_reward, terminated]
+        ReplayBuffer = [agent_x, agent_y, agent_reward, terminated]
         print(ReplayBuffer)
 
     pygame.draw.rect(screen, (255 * collision1 , 255 * (1 - collision1) ,0), Wall)

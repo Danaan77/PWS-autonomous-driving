@@ -3,7 +3,7 @@
 
 //Om dit progamma te starten:
 //Zet in de terminal: g++ Main.cpp -o main.exe -lsfml-graphics -lsfml-window -lsfml-system
-//Zet in de terminal: .\main.exe
+//Zet in de terminal: .\Code_Joyce.cpp.exe
 
 float hoek = 0.f;  //De hoek van de auto instellen, zodat hij kan draaien
 float hoekVerandering = 0.1f;  //De hoekverandering van de auto instellen, zodat hij kan draaien
