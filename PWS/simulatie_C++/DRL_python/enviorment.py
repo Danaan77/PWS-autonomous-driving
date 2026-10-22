@@ -1,9 +1,18 @@
 import pygame
+import numpy as np
+import torch as T
+import torch.nn.functional as F
+import torch.nn as nn
+import torch.optim as optim
+from torch.distributions.normal import Normal
 import os
-from SAC_necesities import Agent
+from SAC_necesities import Agent, ActorNetwork, CriticNetwork, ValueNetwork, ReplayBuffer
+from gymnasium import spaces
+
 
 
 pygame.init()
+
 
 screen = pygame.display.set_mode((640,640))
 
@@ -36,11 +45,14 @@ class JeftAI():
     def get_state(self):
         return self.x, self.v
 
-    def move(self, action='none'):
+    def move(self, action=0):
+
+        self.v = T.tanh(action) * 10
+
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_RIGHT] or action == 'right':
+        if keys[pygame.K_RIGHT]:
             self.v += 10
-        if keys[pygame.K_LEFT] or action == 'left':
+        if keys[pygame.K_LEFT]:
             self.v -= 10
 
         self.x_ = self.x
@@ -70,7 +82,7 @@ class JeftAI():
 
         if self.collision1 or self.collision2:
             self.death_tim += dt
-            if self.death_tim > 20:
+            if self.death_tim > 2:
                 self.terminated = True
                 self.reward -= 100
         else: 
@@ -89,6 +101,10 @@ class Enviorment():
         JeftAI(y=250, x=screen.get_width()/2-20, v=2),
         JeftAI(y=150, x=screen.get_width()/2+30, v=-3)
         ]
+
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
+
+        self.brain = Agent(env=self)
     
     def level_1(self):
         screen.fill((200,150,200))
@@ -99,15 +115,19 @@ class Enviorment():
         pygame.draw.rect(screen, (255, 255 ,0), self.Wall2)
 
     def gather_DATA(self):
-        for agent in self.agents:
-            state = agent.get_state()
-            action = None #choose_action(state)
-            reward, done = agent.rewarding()
-            state_ = agent.move(action)
-            #store_transition(state, action, reward, state_, done)
-            print(state)
+        for Jeeft in self.agents:
+            if Jeeft.terminated == False:
+                state = Jeeft.get_state()
+                action = self.brain.choose_action(state)
 
-        return
+                Jeeft.move(action)
+            
+                next_state = Jeeft.get_state()
+                reward, done = Jeeft.rewarding()
+
+                self.brain.remember(state, action, reward, next_state, done)
+
+        self.brain.learn()
 
     def run_level(self):
 
