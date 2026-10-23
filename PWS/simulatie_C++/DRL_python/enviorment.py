@@ -43,11 +43,13 @@ class JeftAI():
         screen.blit(Jeft_AI, (self.x, self.y))
 
     def get_state(self):
-        return self.x, self.v
+        return self.x, self.v, dt
 
     def move(self, action=0):
 
-        self.v = T.tanh(action) * 10
+        #print(f"action: {action[0]}")
+        self.v = action[0] * 60
+        #print(f"V: {self.v}")
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT]:
@@ -55,38 +57,57 @@ class JeftAI():
         if keys[pygame.K_LEFT]:
             self.v -= 10
 
-        self.x_ = self.x
-        self.x += self.v * dt
+        #self.v *= 0.87
+        #if self.v > 0 and action < 0:
+        #    self.v = min(self.v**0.5, action[0] * 10)
+        #if self.v < 0 and action > 0:
+        #    self.v = max(-(abs(self.v)**0.5), action[0] * 10)
         
-        screen.blit(Jeft_AI, (self.x, self.y))
+        self.x += self.v * dt
 
-        return self.x, self.v
+
+        #print(f"X: {self.x} en Y: {self.y}")
+        screen.blit(Jeft_AI, (int(self.x), int(self.y)))
+
+        return self.x, self.v, dt
 
     def hitbox(self, Wall, Wall2):
-        self.Jeft_AI_hitbox = pygame.Rect(self.x, self.y, Jeft_AI.get_width(), Jeft_AI.get_height())
+        self.Jeft_AI_hitbox = pygame.Rect(int(self.x), int(self.y), Jeft_AI.get_width(), Jeft_AI.get_height())
 
-        self.collision1 = self.Jeft_AI_hitbox.colliderect(Wall)
-        if self.x < 0:
+        self.collision1, self.collision2 = False, False
+
+        if self.x < 0 or self.Jeft_AI_hitbox.colliderect(Wall):
             self.collision1 = True
         
-        self.collision2 = self.Jeft_AI_hitbox.colliderect(Wall2)
-        if self.x > screen.get_width():
+        elif self.x > screen.get_width() or self.Jeft_AI_hitbox.colliderect(Wall2):
             self.collision2 = True
+
 
 
         return self.Jeft_AI_hitbox, self.collision1, self.collision2
 
     
-    def rewarding(self):
-        self.reward = (((screen.get_width() / 2) / 100) ** 2) - (((abs(self.x - (screen.get_width() / 2)) / 100) ** 2) * 1.5)
+    def rewarding(self, action=0):
+        #self.reward = (((screen.get_width() / 2) / 100) ** 2) - (((abs(self.x - (screen.get_width() / 2)) / 100) ** 2) * 1.5)
 
         if self.collision1 or self.collision2:
             self.death_tim += dt
-            if self.death_tim > 2:
+            self.reward = -100
+            #print(f"death_tim: {self.death_tim}")
+            if self.death_tim > 9999:
                 self.terminated = True
                 self.reward -= 100
+                #print("DIETH")
         else: 
             self.death_tim = 0
+
+
+        self.reward = -10
+        if self.x < screen.get_width() / 2 and action > 0:
+            self.reward = 15
+        elif self.x > screen.get_width() / 2 and action < 0:
+            self.reward = 15
+
 
         return self.reward, self.terminated
 
@@ -94,17 +115,17 @@ class JeftAI():
 
 class Enviorment():
     def __init__(self):
+        self.time = 0
         self.running = True
-        self.agents = [
-        JeftAI(y=450, x=screen.get_width()/2, v=0),
-        JeftAI(y=350, x=screen.get_width()/2-50, v=5),
-        JeftAI(y=250, x=screen.get_width()/2-20, v=2),
-        JeftAI(y=150, x=screen.get_width()/2+30, v=-3)
-        ]
+
+        agents_wanted = 100
+        self.agents = []
+        for wanted in range(agents_wanted):
+            self.agents.append(JeftAI(y=screen.get_height()-100-75*wanted, x=np.random.randint(screen.get_width()/2-200, screen.get_width()/2+200), v=np.random.randint(-10,10)))
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
 
-        self.brain = Agent(env=self)
+        self.brain = Agent(input_dims=[3], env=self, n_actions=1)
     
     def level_1(self):
         screen.fill((200,150,200))
@@ -117,27 +138,33 @@ class Enviorment():
     def gather_DATA(self):
         for Jeeft in self.agents:
             if Jeeft.terminated == False:
-                state = Jeeft.get_state()
-                action = self.brain.choose_action(state)
+                Jeeft.state = Jeeft.get_state()
+                Jeeft.action = self.brain.choose_action(Jeeft.state)
 
-                Jeeft.move(action)
+                Jeeft.move(Jeeft.action)
             
-                next_state = Jeeft.get_state()
-                reward, done = Jeeft.rewarding()
+                Jeeft.next_state = Jeeft.get_state()
+                Jeeft.hitbox(self.Wall, self.Wall2)
+                Jeeft.reward, Jeeft.done = Jeeft.rewarding(Jeeft.action)
 
-                self.brain.remember(state, action, reward, next_state, done)
+                self.brain.remember(Jeeft.state, Jeeft.action, Jeeft.reward, Jeeft.next_state, Jeeft.done)
 
+        print(f"State: {self.agents[0].state}, A: {self.agents[0].action}, R: {self.agents[0].reward}")
         self.brain.learn()
 
     def run_level(self):
+
+        global dt
+        dt = clock.tick(60) / 1000
+        dt = max(0.001, min(0.1, dt))
 
         self.level_1()
         self.gather_DATA()
 
         pygame.display.flip()
 
-        dt = clock.tick(60) / 1000
-        dt = max(0.001, min(0.1, dt))
+        self.time += dt
+        #print(self.time)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
