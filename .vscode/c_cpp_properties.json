@@ -3,7 +3,8 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "C:/Users/danie/OneDrive/Documents/PWS-autonomous-driving/Cpp digitale omgeving/sorcecode/SFML-2.6.2-windows-vc17-64-bit/SFML-2.6.2/include"
             ],
             "defines": [
                 "_DEBUG",
