@@ -48,7 +48,7 @@ class JeftAI():
     def move(self, action=0):
 
         #print(f"action: {action[0]}")
-        self.v = action[0] * 60
+        self.v += action[0] * 40
         #print(f"V: {self.v}")
 
         keys = pygame.key.get_pressed()
@@ -57,7 +57,7 @@ class JeftAI():
         if keys[pygame.K_LEFT]:
             self.v -= 10
 
-        #self.v *= 0.87
+        self.v *= 0.87
         #if self.v > 0 and action < 0:
         #    self.v = min(self.v**0.5, action[0] * 10)
         #if self.v < 0 and action > 0:
@@ -88,7 +88,7 @@ class JeftAI():
 
     
     def rewarding(self, action=0):
-        #self.reward = (((screen.get_width() / 2) / 100) ** 2) - (((abs(self.x - (screen.get_width() / 2)) / 100) ** 2) * 1.5)
+        self.reward = (((screen.get_width() / 2) / 100) ** 2) - (((abs(self.x - (screen.get_width() / 2)) / 100) ** 2) * 5)
 
         if self.collision1 or self.collision2:
             self.death_tim += dt
@@ -102,11 +102,11 @@ class JeftAI():
             self.death_tim = 0
 
 
-        self.reward = -10
+
         if self.x < screen.get_width() / 2 and action > 0:
-            self.reward = 15
+            self.reward += 10
         elif self.x > screen.get_width() / 2 and action < 0:
-            self.reward = 15
+            self.reward += 10
 
 
         return self.reward, self.terminated

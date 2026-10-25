@@ -1,0 +1,3 @@
+C:/Users/danie/OneDrive/Documents/PWS-autonomous-driving/Cpp digitale omgeving/SFMLTest/build/CMakeFiles/SFMLTest.dir
+C:/Users/danie/OneDrive/Documents/PWS-autonomous-driving/Cpp digitale omgeving/SFMLTest/build/CMakeFiles/edit_cache.dir
+C:/Users/danie/OneDrive/Documents/PWS-autonomous-driving/Cpp digitale omgeving/SFMLTest/build/CMakeFiles/rebuild_cache.dir
